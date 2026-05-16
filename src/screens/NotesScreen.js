@@ -1,28 +1,28 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../constants/colors';
 
-export default function NotesScreen() {
+export default function NotesScreen({ navigation }) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Мій нотатник</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Мій нотатник</Text>
+        <Text style={styles.subtitle}>Тут буде відображатися список нотаток</Text>
+      </View>
 
-      <Text style={styles.subtitle}>
-        Початковий екран додатку для роботи з нотатками.
-      </Text>
+      <View style={styles.emptyBlock}>
+        <Text style={styles.emptyTitle}>Нотаток поки немає</Text>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Залікова робота</Text>
-
-        <Text style={styles.cardText}>
-          Варіант №16. У цьому проєкті буде реалізовано додавання,
-          редагування, видалення та пошук нотаток. Також кожну нотатку
-          можна буде позначити окремим кольором.
+        <Text style={styles.emptyText}>
+          Створи першу нотатку, щоб перевірити роботу додатку.
         </Text>
       </View>
 
-      <Text style={styles.hint}>
-        Далі буде додано екрани для списку нотаток та їх редагування.
-      </Text>
+      <TouchableOpacity
+        style={styles.mainButton}
+        onPress={() => navigation.navigate('NoteEditor')}
+      >
+        <Text style={styles.mainButtonText}>Створити нотатку</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -30,42 +30,52 @@ export default function NotesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 20,
     backgroundColor: COLORS.background,
-    padding: 24,
-    justifyContent: 'center',
+  },
+  header: {
+    marginBottom: 28,
   },
   title: {
-    fontSize: 34,
+    fontSize: 30,
     fontWeight: '800',
     color: COLORS.text,
-    marginBottom: 12,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: COLORS.muted,
-    lineHeight: 24,
-    marginBottom: 24,
+    marginTop: 4,
   },
-  card: {
+  emptyBlock: {
+    flex: 1,
     backgroundColor: COLORS.white,
-    borderRadius: 18,
-    padding: 20,
-    marginBottom: 20,
+    borderRadius: 20,
+    padding: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  cardTitle: {
-    fontSize: 20,
+  emptyTitle: {
+    fontSize: 22,
     fontWeight: '700',
     color: COLORS.text,
     marginBottom: 8,
   },
-  cardText: {
+  emptyText: {
     fontSize: 15,
     color: COLORS.muted,
+    textAlign: 'center',
     lineHeight: 22,
   },
-  hint: {
-    fontSize: 14,
-    color: COLORS.primary,
-    fontWeight: '600',
+  mainButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginTop: 18,
+  },
+  mainButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '700',
   },
 });
