@@ -1,134 +1,238 @@
+import { useState } from 'react';
 import {
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
-  } from 'react-native';
-  
-  import { COLORS, NOTE_COLORS } from '../constants/colors';
-  
-  export default function NoteEditorScreen() {
-    return (
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView
-            contentContainerStyle={styles.container}
-            keyboardShouldPersistTaps="handled"
-          >
-            <Text style={styles.label}>Заголовок</Text>
-  
-            <TextInput
-              style={styles.titleInput}
-              placeholder="Наприклад: Список справ"
-              placeholderTextColor={COLORS.muted}
-              returnKeyType="done"
-              onSubmitEditing={Keyboard.dismiss}
-            />
-  
-            <Text style={styles.label}>Текст нотатки</Text>
-  
-            <TextInput
-              style={styles.textInput}
-              placeholder="Введи текст нотатки..."
-              placeholderTextColor={COLORS.muted}
-              multiline
-              textAlignVertical="top"
-            />
-  
-            <Text style={styles.label}>Колір нотатки</Text>
-  
-            <View style={styles.colorsRow}>
-              {NOTE_COLORS.map((color) => (
-                <View
-                  key={color}
-                  style={[
-                    styles.colorItem,
-                    {
-                      backgroundColor: color,
-                    },
-                  ]}
-                />
-              ))}
-            </View>
-  
-            <TouchableOpacity
-              style={styles.saveButton}
-              onPress={Keyboard.dismiss}
-            >
-              <Text style={styles.saveButtonText}>Зберегти</Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
+
+import { COLORS, NOTE_COLORS } from '../constants/colors';
+import { addNote, deleteNote, updateNote } from '../storage/notesStorage';
+
+function getCurrentDate() {
+  const date = new Date();
+
+  return date.toLocaleDateString('uk-UA', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+export default function NoteEditorScreen({ navigation, route }) {
+  const editingNote = route.params?.note || null;
+
+  const [title, setTitle] = useState(editingNote?.title || '');
+  const [text, setText] = useState(editingNote?.text || '');
+  const [selectedColor, setSelectedColor] = useState(
+    editingNote?.color || NOTE_COLORS[0]
+  );
+
+  const isEditing = Boolean(editingNote);
+
+  async function handleSave() {
+    const trimmedTitle = title.trim();
+    const trimmedText = text.trim();
+
+    if (!trimmedTitle && !trimmedText) {
+      Alert.alert('Помилка', 'Нотатка не може бути порожньою.');
+      return;
+    }
+
+    if (isEditing) {
+      const updatedNote = {
+        ...editingNote,
+        title: trimmedTitle,
+        text: trimmedText,
+        color: selectedColor,
+        updatedAt: getCurrentDate(),
+      };
+
+      await updateNote(updatedNote);
+    } else {
+      const newNote = {
+        id: Date.now().toString(),
+        title: trimmedTitle,
+        text: trimmedText,
+        color: selectedColor,
+        createdAt: getCurrentDate(),
+        updatedAt: getCurrentDate(),
+      };
+
+      await addNote(newNote);
+    }
+
+    Keyboard.dismiss();
+    navigation.goBack();
+  }
+
+  async function handleDelete() {
+    Alert.alert(
+      'Видалити нотатку?',
+      'Після видалення її не можна буде відновити.',
+      [
+        {
+          text: 'Скасувати',
+          style: 'cancel',
+        },
+        {
+          text: 'Видалити',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteNote(editingNote.id);
+            navigation.goBack();
+          },
+        },
+      ]
     );
   }
-  
-  const styles = StyleSheet.create({
-    keyboardView: {
-      flex: 1,
-      backgroundColor: COLORS.background,
-    },
-    container: {
-      flexGrow: 1,
-      padding: 20,
-      backgroundColor: COLORS.background,
-    },
-    label: {
-      fontSize: 15,
-      fontWeight: '700',
-      color: COLORS.text,
-      marginBottom: 8,
-      marginTop: 14,
-    },
-    titleInput: {
-      backgroundColor: COLORS.white,
-      borderRadius: 14,
-      paddingHorizontal: 16,
-      paddingVertical: 14,
-      fontSize: 16,
-      color: COLORS.text,
-    },
-    textInput: {
-      minHeight: 180,
-      backgroundColor: COLORS.white,
-      borderRadius: 14,
-      paddingHorizontal: 16,
-      paddingVertical: 14,
-      fontSize: 16,
-      color: COLORS.text,
-      lineHeight: 22,
-    },
-    colorsRow: {
-      flexDirection: 'row',
-      gap: 12,
-      marginBottom: 24,
-    },
-    colorItem: {
-      width: 38,
-      height: 38,
-      borderRadius: 19,
-      borderWidth: 2,
-      borderColor: COLORS.white,
-    },
-    saveButton: {
-      backgroundColor: COLORS.primary,
-      paddingVertical: 16,
-      borderRadius: 16,
-      alignItems: 'center',
-      marginTop: 'auto',
-    },
-    saveButtonText: {
-      color: COLORS.white,
-      fontSize: 16,
-      fontWeight: '700',
-    },
-  });
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.keyboardView}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.label}>Заголовок</Text>
+
+          <TextInput
+            style={styles.titleInput}
+            placeholder="Наприклад: Список справ"
+            placeholderTextColor={COLORS.muted}
+            value={title}
+            onChangeText={setTitle}
+            returnKeyType="done"
+            onSubmitEditing={Keyboard.dismiss}
+          />
+
+          <Text style={styles.label}>Текст нотатки</Text>
+
+          <TextInput
+            style={styles.textInput}
+            placeholder="Введи текст нотатки..."
+            placeholderTextColor={COLORS.muted}
+            value={text}
+            onChangeText={setText}
+            multiline
+            textAlignVertical="top"
+          />
+
+          <Text style={styles.label}>Колір нотатки</Text>
+
+          <View style={styles.colorsRow}>
+            {NOTE_COLORS.map((color) => (
+              <TouchableOpacity
+                key={color}
+                style={[
+                  styles.colorItem,
+                  {
+                    backgroundColor: color,
+                    borderColor:
+                      selectedColor === color ? COLORS.primary : COLORS.white,
+                  },
+                ]}
+                onPress={() => setSelectedColor(color)}
+              />
+            ))}
+          </View>
+
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveButtonText}>
+              {isEditing ? 'Зберегти зміни' : 'Зберегти'}
+            </Text>
+          </TouchableOpacity>
+
+          {isEditing && (
+            <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+              <Text style={styles.deleteButtonText}>Видалити нотатку</Text>
+            </TouchableOpacity>
+          )}
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  keyboardView: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: COLORS.background,
+  },
+  label: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 8,
+    marginTop: 14,
+  },
+  titleInput: {
+    backgroundColor: COLORS.white,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: COLORS.text,
+  },
+  textInput: {
+    minHeight: 180,
+    backgroundColor: COLORS.white,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: COLORS.text,
+    lineHeight: 22,
+  },
+  colorsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+  },
+  colorItem: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 3,
+  },
+  saveButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginTop: 'auto',
+  },
+  saveButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  deleteButton: {
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#EF4444',
+  },
+  deleteButtonText: {
+    color: '#EF4444',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+});
