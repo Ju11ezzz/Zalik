@@ -6,18 +6,20 @@ export default function NoteCard({ note, onPress }) {
     <TouchableOpacity
       style={[styles.card, { backgroundColor: note.color }]}
       onPress={onPress}
-      activeOpacity={0.8}
+      activeOpacity={0.85}
     >
-      <View style={styles.content}>
+      <View style={styles.header}>
         <Text style={styles.title} numberOfLines={1}>
           {note.title || 'Без назви'}
         </Text>
+      </View>
 
-        <Text style={styles.text} numberOfLines={3}>
-          {note.text || 'Порожня нотатка'}
-        </Text>
+      <Text style={styles.text} numberOfLines={3}>
+        {note.text || 'Порожня нотатка'}
+      </Text>
 
-        <Text style={styles.date}>{note.updatedAt}</Text>
+      <View style={styles.footer}>
+        <Text style={styles.date}>Змінено: {note.updatedAt}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -28,9 +30,17 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 16,
     marginBottom: 14,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  content: {
-    gap: 8,
+  header: {
+    marginBottom: 8,
   },
   title: {
     fontSize: 18,
@@ -41,10 +51,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.text,
     lineHeight: 21,
+    marginBottom: 12,
+  },
+  footer: {
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(31, 41, 55, 0.12)',
+    paddingTop: 8,
   },
   date: {
     fontSize: 12,
     color: COLORS.muted,
-    marginTop: 4,
   },
 });

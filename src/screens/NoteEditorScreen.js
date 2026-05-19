@@ -104,60 +104,69 @@ export default function NoteEditorScreen({ navigation, route }) {
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.label}>Заголовок</Text>
+          <View style={styles.formBlock}>
+            <Text style={styles.label}>Заголовок</Text>
 
-          <TextInput
-            style={styles.titleInput}
-            placeholder="Наприклад: Список справ"
-            placeholderTextColor={COLORS.muted}
-            value={title}
-            onChangeText={setTitle}
-            returnKeyType="done"
-            onSubmitEditing={Keyboard.dismiss}
-          />
+            <TextInput
+              style={styles.titleInput}
+              placeholder="Наприклад: Список справ"
+              placeholderTextColor={COLORS.muted}
+              value={title}
+              onChangeText={setTitle}
+              returnKeyType="done"
+              onSubmitEditing={Keyboard.dismiss}
+            />
 
-          <Text style={styles.label}>Текст нотатки</Text>
+            <Text style={styles.label}>Текст нотатки</Text>
 
-          <TextInput
-            style={styles.textInput}
-            placeholder="Введи текст нотатки..."
-            placeholderTextColor={COLORS.muted}
-            value={text}
-            onChangeText={setText}
-            multiline
-            textAlignVertical="top"
-          />
+            <TextInput
+              style={styles.textInput}
+              placeholder="Введи текст нотатки..."
+              placeholderTextColor={COLORS.muted}
+              value={text}
+              onChangeText={setText}
+              multiline
+              textAlignVertical="top"
+            />
 
-          <Text style={styles.label}>Колір нотатки</Text>
+            <Text style={styles.label}>Колір нотатки</Text>
 
-          <View style={styles.colorsRow}>
-            {NOTE_COLORS.map((color) => (
-              <TouchableOpacity
-                key={color}
-                style={[
-                  styles.colorItem,
-                  {
-                    backgroundColor: color,
-                    borderColor:
-                      selectedColor === color ? COLORS.primary : COLORS.white,
-                  },
-                ]}
-                onPress={() => setSelectedColor(color)}
-              />
-            ))}
+            <View style={styles.colorsRow}>
+              {NOTE_COLORS.map((color) => {
+                const isSelected = selectedColor === color;
+
+                return (
+                  <TouchableOpacity
+                    key={color}
+                    style={[
+                      styles.colorItem,
+                      {
+                        backgroundColor: color,
+                        borderColor: isSelected ? COLORS.primary : COLORS.white,
+                      },
+                    ]}
+                    onPress={() => setSelectedColor(color)}
+                  >
+                    {isSelected && <Text style={styles.checkMark}>✓</Text>}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
 
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>
-              {isEditing ? 'Зберегти зміни' : 'Зберегти'}
-            </Text>
-          </TouchableOpacity>
-
-          {isEditing && (
-            <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-              <Text style={styles.deleteButtonText}>Видалити нотатку</Text>
+          <View style={styles.actions}>
+            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+              <Text style={styles.saveButtonText}>
+                {isEditing ? 'Зберегти зміни' : 'Зберегти'}
+              </Text>
             </TouchableOpacity>
-          )}
+
+            {isEditing && (
+              <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+                <Text style={styles.deleteButtonText}>Видалити нотатку</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -174,6 +183,11 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: COLORS.background,
   },
+  formBlock: {
+    backgroundColor: COLORS.white,
+    borderRadius: 20,
+    padding: 18,
+  },
   label: {
     fontSize: 15,
     fontWeight: '700',
@@ -182,7 +196,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   titleInput: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.background,
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -190,8 +204,8 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   textInput: {
-    minHeight: 180,
-    backgroundColor: COLORS.white,
+    minHeight: 190,
+    backgroundColor: COLORS.background,
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -201,21 +215,32 @@ const styles = StyleSheet.create({
   },
   colorsRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 24,
+    marginTop: 2,
+    marginBottom: 8,
   },
   colorItem: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     borderWidth: 3,
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkMark: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: COLORS.primary,
+  },
+  actions: {
+    marginTop: 'auto',
+    paddingTop: 18,
   },
   saveButton: {
     backgroundColor: COLORS.primary,
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',
-    marginTop: 'auto',
   },
   saveButtonText: {
     color: COLORS.white,
