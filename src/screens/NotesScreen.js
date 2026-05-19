@@ -52,8 +52,16 @@ export default function NotesScreen({ navigation }) {
     });
   }, [notes, searchText, selectedColor]);
 
+  const hasActiveFilters =
+    searchText.trim().length > 0 || selectedColor !== null;
+
   function openEditor(note = null) {
     navigation.navigate('NoteEditor', { note });
+  }
+
+  function resetFilters() {
+    setSearchText('');
+    setSelectedColor(null);
   }
 
   return (
@@ -106,6 +114,20 @@ export default function NotesScreen({ navigation }) {
             <Text style={styles.mainButtonText}>Створити нотатку</Text>
           </TouchableOpacity>
         </>
+      ) : filteredNotes.length === 0 ? (
+        <View style={styles.emptyBlock}>
+          <Text style={styles.emptyTitle}>Нічого не знайдено</Text>
+
+          <Text style={styles.emptyText}>
+            Спробуй змінити текст пошуку або вибрати інший колір.
+          </Text>
+
+          {hasActiveFilters && (
+            <TouchableOpacity style={styles.clearButton} onPress={resetFilters}>
+              <Text style={styles.clearButtonText}>Скинути фільтри</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       ) : (
         <FlatList
           data={filteredNotes}
@@ -201,6 +223,19 @@ const styles = StyleSheet.create({
   mainButtonText: {
     color: COLORS.white,
     fontSize: 16,
+    fontWeight: '700',
+  },
+  clearButton: {
+    marginTop: 18,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+  },
+  clearButtonText: {
+    color: COLORS.primary,
+    fontSize: 15,
     fontWeight: '700',
   },
   listContent: {
