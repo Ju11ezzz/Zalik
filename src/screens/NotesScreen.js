@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -31,6 +31,21 @@ export default function NotesScreen({ navigation }) {
     }, [])
   );
 
+  const filteredNotes = useMemo(() => {
+    const normalizedSearch = searchText.trim().toLowerCase();
+
+    if (!normalizedSearch) {
+      return notes;
+    }
+
+    return notes.filter((note) => {
+      const title = (note.title || '').toLowerCase();
+      const text = (note.text || '').toLowerCase();
+
+      return title.includes(normalizedSearch) || text.includes(normalizedSearch);
+    });
+  }, [notes, searchText]);
+
   function openEditor(note = null) {
     navigation.navigate('NoteEditor', { note });
   }
@@ -40,7 +55,9 @@ export default function NotesScreen({ navigation }) {
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Мій нотатник</Text>
-          <Text style={styles.subtitle}>Усього нотаток: {notes.length}</Text>
+          <Text style={styles.subtitle}>
+            Усього нотаток: {notes.length}
+          </Text>
         </View>
 
         <TouchableOpacity
@@ -82,7 +99,7 @@ export default function NotesScreen({ navigation }) {
         </>
       ) : (
         <FlatList
-          data={notes}
+          data={filteredNotes}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <NoteCard note={item} onPress={() => openEditor(item)} />
