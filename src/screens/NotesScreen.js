@@ -4,6 +4,7 @@ import {
   FlatList,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -16,6 +17,7 @@ import { getNotes } from '../storage/notesStorage';
 export default function NotesScreen({ navigation }) {
   const [notes, setNotes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchText, setSearchText] = useState('');
 
   async function loadNotes() {
     const savedNotes = await getNotes();
@@ -38,9 +40,7 @@ export default function NotesScreen({ navigation }) {
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Мій нотатник</Text>
-          <Text style={styles.subtitle}>
-            Усього нотаток: {notes.length}
-          </Text>
+          <Text style={styles.subtitle}>Усього нотаток: {notes.length}</Text>
         </View>
 
         <TouchableOpacity
@@ -50,6 +50,14 @@ export default function NotesScreen({ navigation }) {
           <Text style={styles.smallButtonText}>+</Text>
         </TouchableOpacity>
       </View>
+
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Пошук нотатки..."
+        placeholderTextColor={COLORS.muted}
+        value={searchText}
+        onChangeText={setSearchText}
+      />
 
       {isLoading ? (
         <View style={styles.centerBlock}>
@@ -97,7 +105,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 22,
+    marginBottom: 18,
   },
   title: {
     fontSize: 30,
@@ -122,6 +130,15 @@ const styles = StyleSheet.create({
     lineHeight: 32,
     color: COLORS.white,
     fontWeight: '600',
+  },
+  searchInput: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: COLORS.text,
+    marginBottom: 16,
   },
   centerBlock: {
     flex: 1,
