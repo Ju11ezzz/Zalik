@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
+import ColorFilter from '../components/ColorFilter';
 import NoteCard from '../components/NoteCard';
 import { COLORS } from '../constants/colors';
 import { getNotes } from '../storage/notesStorage';
@@ -18,6 +19,7 @@ export default function NotesScreen({ navigation }) {
   const [notes, setNotes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
+  const [selectedColor, setSelectedColor] = useState(null);
 
   async function loadNotes() {
     const savedNotes = await getNotes();
@@ -34,17 +36,21 @@ export default function NotesScreen({ navigation }) {
   const filteredNotes = useMemo(() => {
     const normalizedSearch = searchText.trim().toLowerCase();
 
-    if (!normalizedSearch) {
-      return notes;
-    }
-
     return notes.filter((note) => {
       const title = (note.title || '').toLowerCase();
       const text = (note.text || '').toLowerCase();
 
-      return title.includes(normalizedSearch) || text.includes(normalizedSearch);
+      const matchesSearch =
+        !normalizedSearch ||
+        title.includes(normalizedSearch) ||
+        text.includes(normalizedSearch);
+
+      const matchesColor =
+        selectedColor === null || note.color === selectedColor;
+
+      return matchesSearch && matchesColor;
     });
-  }, [notes, searchText]);
+  }, [notes, searchText, selectedColor]);
 
   function openEditor(note = null) {
     navigation.navigate('NoteEditor', { note });
@@ -55,9 +61,7 @@ export default function NotesScreen({ navigation }) {
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Мій нотатник</Text>
-          <Text style={styles.subtitle}>
-            Усього нотаток: {notes.length}
-          </Text>
+          <Text style={styles.subtitle}>Усього нотаток: {notes.length}</Text>
         </View>
 
         <TouchableOpacity
@@ -74,6 +78,11 @@ export default function NotesScreen({ navigation }) {
         placeholderTextColor={COLORS.muted}
         value={searchText}
         onChangeText={setSearchText}
+      />
+
+      <ColorFilter
+        selectedColor={selectedColor}
+        onSelectColor={setSelectedColor}
       />
 
       {isLoading ? (
@@ -155,7 +164,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 15,
     color: COLORS.text,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   centerBlock: {
     flex: 1,
