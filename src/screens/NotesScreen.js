@@ -55,6 +55,17 @@ export default function NotesScreen({ navigation }) {
   const hasActiveFilters =
     searchText.trim().length > 0 || selectedColor !== null;
 
+  const sectionTitle =
+    notes.length === 0
+      ? 'Поки порожньо'
+      : hasActiveFilters
+        ? 'Результати'
+        : 'Усі записи';
+
+  const sectionSubtitle = hasActiveFilters
+    ? `Знайдено: ${filteredNotes.length} з ${notes.length}`
+    : `Усього нотаток: ${notes.length}`;
+
   function openEditor(note = null) {
     navigation.navigate('NoteEditor', { note });
   }
@@ -67,14 +78,20 @@ export default function NotesScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Мій нотатник</Text>
-          <Text style={styles.subtitle}>Усього нотаток: {notes.length}</Text>
+        <View style={styles.titleBlock}>
+          <Text style={styles.title} numberOfLines={1}>
+            {sectionTitle}
+          </Text>
+
+          <Text style={styles.subtitle} numberOfLines={1}>
+            {sectionSubtitle}
+          </Text>
         </View>
 
         <TouchableOpacity
           style={styles.smallButton}
           onPress={() => openEditor()}
+          activeOpacity={0.8}
         >
           <Text style={styles.smallButtonText}>+</Text>
         </TouchableOpacity>
@@ -110,6 +127,7 @@ export default function NotesScreen({ navigation }) {
           <TouchableOpacity
             style={styles.mainButton}
             onPress={() => openEditor()}
+            activeOpacity={0.85}
           >
             <Text style={styles.mainButtonText}>Створити нотатку</Text>
           </TouchableOpacity>
@@ -123,7 +141,11 @@ export default function NotesScreen({ navigation }) {
           </Text>
 
           {hasActiveFilters && (
-            <TouchableOpacity style={styles.clearButton} onPress={resetFilters}>
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={resetFilters}
+              activeOpacity={0.85}
+            >
               <Text style={styles.clearButtonText}>Скинути фільтри</Text>
             </TouchableOpacity>
           )}
@@ -154,6 +176,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 18,
+  },
+  titleBlock: {
+    flex: 1,
+    marginRight: 12,
   },
   title: {
     fontSize: 30,
