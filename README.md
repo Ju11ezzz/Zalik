@@ -98,7 +98,7 @@ git clone https://github.com/Ju11ezzz/Zalik.git
 Перейти в папку проєкту:
 
 ```bash
-cd ColorNotes
+cd Zalik
 ```
 
 Встановити залежності:
